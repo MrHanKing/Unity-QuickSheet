@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ExcelEditor.Tool.ProjectTablesPopup focusable="true" />
+    <ui:VisualElement name="table-contents" style="flex-grow: 1;" />
+</ui:UXML>

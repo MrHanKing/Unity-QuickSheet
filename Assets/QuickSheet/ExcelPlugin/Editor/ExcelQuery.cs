@@ -43,11 +43,11 @@ namespace UnityQuickSheet
                         workbook = new HSSFWorkbook(fileStream);
                     else if (extension == "xlsx")
                     {
-                    #if UNITY_EDITOR_OSX
+#if UNITY_EDITOR_OSX
                         throw new Exception("xlsx is not supported on OSX.");
-                    #else
+#else
                         workbook = new XSSFWorkbook(fileStream);
-                    #endif
+#endif
                     }
                     else
                     {

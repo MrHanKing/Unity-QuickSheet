@@ -15,7 +15,7 @@ MonoBehaviour:
   templatePath: QuickSheet/ExcelPlugin/Templates
   scriptFilePath: QuickSheet/Example/Data/Runtime
   editorScriptFilePath: QuickSheet/Example/Data/Editor
-  sheetName: Example.xlsx
+  sheetName: Example.xls
   workSheetName: ExcelExample
   columnHeaderList:
   - type: 3
@@ -34,7 +34,7 @@ MonoBehaviour:
     name: Difficulty
     isEnable: 0
     isArray: 0
-  excelFilePath: Assets/QuickSheet/Example/Excel/Example.xlsx
+  excelFilePath: Assets/QuickSheet/Example/Excel/Example.xls
   SheetNames:
   - ExcelExample
   currentSelectedSheet: 0
