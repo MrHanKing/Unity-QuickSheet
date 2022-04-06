@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityQuickSheet;
 
 namespace ExcelEditor.Tool
 {
@@ -27,7 +28,6 @@ namespace ExcelEditor.Tool
         : base(GetChoices(), GetDefaultIndex(), FormatSelectedLabel, FormatListLabel)
         {
             label = "Selected Table Collection";
-
             // LocalizationEditorSettings.EditorEvents.CollectionAdded += OnCollectionAdded;
             // LocalizationEditorSettings.EditorEvents.CollectionRemoved += OnCollectionRemoved;
             // LocalizationEditorSettings.EditorEvents.CollectionModified += OnCollectionModified;
@@ -100,7 +100,7 @@ namespace ExcelEditor.Tool
 
         static string FormatListLabel(ExcelExample atc)
         {
-            return atc is NoTables ? atc.ToString() : $"{atc.SheetName}/{atc.WorksheetName}";
+            return atc is NoTables ? atc.ToString() : $"{atc.GetType().Name}/{atc.WorksheetName}";
         }
 
         static string FormatSelectedLabel(ExcelExample atc) => atc.ToString();
@@ -111,8 +111,7 @@ namespace ExcelEditor.Tool
                 s_Tables = new List<ExcelExample>();
             s_Tables.Clear();
 
-            // s_Tables.AddRange(LocalizationEditorSettings.Instance.TableCollectionCache.StringTableCollections);
-            // s_Tables.AddRange(LocalizationEditorSettings.Instance.TableCollectionCache.AssetTableCollections);
+            s_Tables.AddRange(ExcelSettings.Instance.TablesOSCache);
 
             if (s_Tables.Count == 0)
                 s_Tables.Add(k_NoTables);
