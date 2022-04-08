@@ -7,6 +7,9 @@ using UnityEngine.UIElements;
 
 namespace ExcelEditor.Tool
 {
+    /// <summary>
+    /// 编辑器资源的管理
+    /// </summary>
     public static class EditorUIResources
     {
         const string k_TemplateRoot = "Assets/QuickSheet/Editor/UI/Templates";

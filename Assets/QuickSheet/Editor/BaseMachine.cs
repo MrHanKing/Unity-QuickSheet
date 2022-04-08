@@ -9,11 +9,32 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 namespace UnityQuickSheet
 {
     /// <summary>
-    /// A class which represents column header on the worksheet.
+    /// 数据容器 编辑器时用
+    /// </summary>
+    public class CellEntry
+    {
+        public string rawValue;
+    }
+
+    /// <summary>
+    /// 一列数据
+    /// </summary>
+    public class ColumnDatas : ScriptableObject
+    {
+        public ColumnHeader columnHeader;
+        public AllRowEntryHeader allRowEntryHeader;
+
+        public List<CellEntry> datasEntry = new List<CellEntry>();
+    }
+
+
+    /// <summary>
+    /// 列头的数据
     /// </summary>
     [System.Serializable]
     public class ColumnHeader
@@ -26,7 +47,116 @@ namespace UnityQuickSheet
 
         // used to order columns by ascending. (only need on excel-plugin)
         public int OrderNO { get; set; }
+
+        public override string ToString()
+        {
+            return name;
+        }
     }
+
+    /// <summary>
+    /// 表格所有的行Header数据 编辑器用
+    /// </summary>
+    public class AllRowEntryHeader : ScriptableObject
+    {
+        [SerializeField]
+        public List<RowEntryHeader> m_Entries = new List<RowEntryHeader>();
+
+        /// <summary>
+        /// RowEntryHeader.Key 和 value的存储 方便索引
+        /// </summary>
+        /// <typeparam name="string"></typeparam>
+        /// <typeparam name="RowEntryHeader"></typeparam>
+        /// <returns></returns>
+        Dictionary<string, RowEntryHeader> m_KeyDictionary = new Dictionary<string, RowEntryHeader>();
+        /// <summary>
+        /// 是否有包含key的行存在
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool Contains(string key) => FindWithKey(key) != null;
+        RowEntryHeader FindWithKey(string key)
+        {
+            if (m_KeyDictionary.Count == 0)
+            {
+                foreach (var keyAndIdPair in m_Entries)
+                {
+                    m_KeyDictionary[keyAndIdPair.Key] = keyAndIdPair;
+                }
+            }
+
+            m_KeyDictionary.TryGetValue(key, out var foundPair);
+            return foundPair;
+        }
+
+        /// <summary>
+        /// 重命名某行
+        /// </summary>
+        /// <param name="oldValue"></param>
+        /// <param name="newValue"></param>
+        public void RenameKey(string oldValue, string newValue)
+        {
+            var foundEntry = FindWithKey(oldValue);
+            if (foundEntry != null)
+                RenameKeyInternal(foundEntry, newValue);
+        }
+        void RenameKeyInternal(RowEntryHeader entry, string newValue)
+        {
+            if (m_KeyDictionary.Count > 0)
+            {
+                m_KeyDictionary.Remove(entry.Key);
+                m_KeyDictionary[newValue] = entry;
+            }
+
+            entry.Key = newValue;
+        }
+    }
+
+    /// <summary>
+    /// 行数据
+    /// </summary>
+    [Serializable]
+    public class RowEntryHeader
+    {
+        [SerializeField]
+        long m_Id;
+
+        [SerializeField]
+        string m_Key;
+
+        // [SerializeField]
+        // MetadataCollection m_Metadata = new MetadataCollection();
+
+        /// <summary>
+        /// Unique id
+        /// </summary>
+        public long Id
+        {
+            get => m_Id;
+            internal set => m_Id = value;
+        }
+
+        /// <summary>
+        /// The name of the key, must also be unique.
+        /// </summary>
+        public string Key
+        {
+            get => m_Key;
+            internal set => m_Key = value;
+        }
+
+        /// <summary>
+        /// Optional Metadata for this key that is also shared between all tables that use this <see cref="SharedTableData"/>.
+        /// </summary>
+        // public MetadataCollection Metadata
+        // {
+        //     get => m_Metadata;
+        //     set => m_Metadata = value;
+        // }
+
+        public override string ToString() => $"{Id} - {Key}";
+    }
+
 
     /// <summary>
     /// A class which stores various settings for a worksheet which is imported.
@@ -79,6 +209,11 @@ namespace UnityQuickSheet
         {
             get { return workSheetName; }
             set { workSheetName = value; }
+        }
+
+        public string WorkTableName
+        {
+            get { return workSheetName; }
         }
 
         [System.NonSerialized]

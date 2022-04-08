@@ -10,12 +10,13 @@ namespace ExcelEditor.Tool
 {
     /// <summary>
     /// 表格选择下拉条
+    /// T 选择的数据内容
     /// </summary>
-    public class ProjectTablesPopup : PopupField<ExcelExample>
+    public class ProjectTablesPopup : PopupField<ExcelMachine>
     {
         public new class UxmlFactory : UxmlFactory<ProjectTablesPopup> { }
 
-        class NoTables : ExcelExample
+        class NoTables : ExcelMachine
         {
 
         }
@@ -23,7 +24,7 @@ namespace ExcelEditor.Tool
         const string k_EditorPrefValueKey = "Localization-SelectedAssetTable";
         const string k_NoTablesMessage = "No Asset Tables Found. Please Create One";
         static readonly NoTables k_NoTables = NoTables.CreateInstance<NoTables>();
-        static List<ExcelExample> s_Tables;
+        static List<ExcelMachine> s_Tables;
         public ProjectTablesPopup()
         : base(GetChoices(), GetDefaultIndex(), FormatSelectedLabel, FormatListLabel)
         {
@@ -40,12 +41,12 @@ namespace ExcelEditor.Tool
             // LocalizationEditorSettings.EditorEvents.CollectionModified -= OnCollectionModified;
         }
 
-        void OnCollectionModified(object called, ExcelExample col)
+        void OnCollectionModified(object called, ExcelMachine col)
         {
             OnCollectionAdded(col);
         }
 
-        void OnCollectionAdded(ExcelExample col)
+        void OnCollectionAdded(ExcelMachine col)
         {
             bool isEmpty = value is NoTables;
             GetChoices();
@@ -55,7 +56,7 @@ namespace ExcelEditor.Tool
                 value = col;
         }
 
-        void OnCollectionRemoved(ExcelExample col)
+        void OnCollectionRemoved(ExcelMachine col)
         {
             var choices = GetChoices();
 
@@ -78,7 +79,7 @@ namespace ExcelEditor.Tool
             return 0;
         }
 
-        public override ExcelExample value
+        public override ExcelMachine value
         {
             get => base.value;
             set
@@ -98,17 +99,24 @@ namespace ExcelEditor.Tool
             SetValueWithoutNotify(s_Tables[newValue]);
         }
 
-        static string FormatListLabel(ExcelExample atc)
+        static string FormatListLabel(ExcelMachine atc)
         {
-            return atc is NoTables ? atc.ToString() : $"{atc.GetType().Name}/{atc.WorksheetName}";
+            return atc is NoTables ? atc.ToString() : $"{atc.GetType().Name}/{atc.WorkSheetName}";
         }
 
-        static string FormatSelectedLabel(ExcelExample atc) => atc.ToString();
+        static string FormatSelectedLabel(ExcelMachine atc)
+        {
+            if (atc == null)
+            {
+                return nameof(NoTables);
+            }
+            return atc.ToString();
+        }
 
-        static List<ExcelExample> GetChoices()
+        static List<ExcelMachine> GetChoices()
         {
             if (s_Tables == null)
-                s_Tables = new List<ExcelExample>();
+                s_Tables = new List<ExcelMachine>();
             s_Tables.Clear();
 
             s_Tables.AddRange(ExcelSettings.Instance.TablesOSCache);

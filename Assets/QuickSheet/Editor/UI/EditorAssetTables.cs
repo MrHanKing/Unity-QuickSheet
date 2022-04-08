@@ -2,9 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityQuickSheet;
 
 namespace ExcelEditor.Tool
 {
+    /// <summary>
+    /// 跟UI匹配 windows上创建表格编辑
+    /// </summary>
     public class EditorAssetTables : VisualElement
     {
         internal new class UxmlFactory : UxmlFactory<EditorAssetTables> { }
@@ -24,32 +28,32 @@ namespace ExcelEditor.Tool
 
             m_TableContents = this.Q("table-contents");
             m_AssetTablesField = this.Q<ProjectTablesPopup>();
-            // m_AssetTablesField.RegisterValueChangedCallback((evt) => TableCollectionSelected(evt.newValue));
+            m_AssetTablesField.RegisterValueChangedCallback((evt) => TableCollectionSelected(evt.newValue));
             // TableCollectionSelected(m_AssetTablesField.value);
         }
 
-        // void TableCollectionSelected(LocalizationTableCollection ltc)
-        // {
-        //     m_TableContents.Clear();
+        void TableCollectionSelected(ExcelMachine ltc)
+        {
+            m_TableContents.Clear();
 
-        //     if (m_CurrentEditor != null)
-        //     {
-        //         m_CurrentEditor.OnDisable();
-        //     }
+            // if (m_CurrentEditor != null)
+            // {
+            //     m_CurrentEditor.OnDisable();
+            // }
 
-        //     if (ltc == null || ltc.TableType == null)
-        //         return;
+            // if (ltc == null || ltc.TableType == null)
+            //     return;
 
-        //     var editorType = GetEditorTypeForCollection(ltc.GetType());
-        //     if (editorType == null)
-        //         return;
+            // var editorType = GetEditorTypeForCollection(ltc.GetType());
+            // if (editorType == null)
+            //     return;
 
-        //     m_CurrentEditor = (TableEditor)Activator.CreateInstance(editorType);
-        //     m_CurrentEditor.TableCollection = ltc;
-        //     m_TableContents.Add(m_CurrentEditor);
-        //     m_CurrentEditor.StretchToParentSize();
-        //     m_CurrentEditor.OnEnable();
-        // }
+            // m_CurrentEditor = (TableEditor)Activator.CreateInstance(editorType);
+            // m_CurrentEditor.TableCollection = ltc;
+            // m_TableContents.Add(m_CurrentEditor);
+            // m_CurrentEditor.StretchToParentSize();
+            // m_CurrentEditor.OnEnable();
+        }
 
         // static Type GetEditorTypeForCollection(Type tableType)
         // {
