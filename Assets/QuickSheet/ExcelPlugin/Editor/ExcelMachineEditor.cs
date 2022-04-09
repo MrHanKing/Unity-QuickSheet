@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace UnityQuickSheet
 {
@@ -20,6 +21,7 @@ namespace UnityQuickSheet
     [CustomEditor(typeof(ExcelMachine))]
     public class ExcelMachineEditor : BaseMachineEditor
     {
+        protected readonly static string ExcelDataFilename = "Default ExcelData.asset";
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -180,9 +182,139 @@ namespace UnityQuickSheet
                     Debug.LogError("Failed to create a script from excel.");
             }
 
+            var targetDirectoryInfo = FilePathSelected();
+
+            if (GUILayout.Button("GenerateAllClass"))
+            {
+                GenerateAllClass(targetDirectoryInfo);
+            }
+            if (GUILayout.Button("GenerateAllObjectScript"))
+            {
+
+            }
+
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(machine);
+            }
+        }
+
+        /// <summary>
+        /// 文件路径选择器
+        /// </summary>
+        /// <returns></returns>
+        private DirectoryInfo FilePathSelected()
+        {
+            DirectoryInfo targetDirectory = null;
+            //选择所有表格所在路径
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("File:", GUILayout.Width(50));
+            ExcelMachine machine = target as ExcelMachine;
+            string path = string.Empty;
+            if (string.IsNullOrEmpty(machine.allExcelFilePath))
+            {
+                path = Application.dataPath;
+                targetDirectory = new DirectoryInfo(path);
+            }
+            else
+            {
+                path = machine.allExcelFilePath;
+                targetDirectory = new DirectoryInfo(Path.GetFullPath(path));
+            }
+
+            var with = Mathf.Max(250, path.Length * 10);
+            machine.allExcelFilePath = GUILayout.TextField(path, GUILayout.Width(with));
+
+            if (GUILayout.Button("...", GUILayout.Width(20)))
+            {
+                string folder = Path.GetDirectoryName(path);
+#if UNITY_EDITOR_WIN
+                path = EditorUtility.OpenFolderPanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
+#else // for UNITY_EDITOR_OSX
+                path = EditorUtility.OpenFolderPanel("Open Excel file", folder, "xls");
+#endif
+                Debug.Log(path);
+
+                // 获得相对路径储存
+                string comparePath = "Assets/";
+
+                var absolutePath = new DirectoryInfo(comparePath).FullName;
+                machine.allExcelFilePath = PathHelper.RelativePath(absolutePath, path);
+                Debug.Log("aaa:" + machine.allExcelFilePath);
+
+                // 收集所有表格
+                targetDirectory = new DirectoryInfo(path);
+            }
+            GUILayout.EndHorizontal();
+
+            return targetDirectory;
+        }
+
+        private string GetAssetAbsolutePath()
+        {
+            // 获得相对路径储存
+            string comparePath = "Assets/";
+
+            var absolutePath = new DirectoryInfo(comparePath).FullName;
+            return absolutePath;
+        }
+        /// <summary>
+        /// 找到所有Excel
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <returns></returns>
+        private List<FileInfo> FindAllExcels(DirectoryInfo directory)
+        {
+#if UNITY_EDITOR_WIN
+            string[] _patterns = new string[] { "*.xls", "*.xlsx"};//识别不同的后缀名
+#else
+            string[] _patterns = new string[] { "*.xls" };//识别不同的后缀名
+#endif
+            List<FileInfo> _allFilePaths = new List<FileInfo>();
+            foreach (var pattern in _patterns)
+            {
+                FileInfo[] _temp = directory.GetFiles(pattern, SearchOption.AllDirectories);
+                _allFilePaths.AddRange(_temp);
+            }
+            return _allFilePaths;
+        }
+
+        private void GenerateAllClass(DirectoryInfo directory)
+        {
+            var files = FindAllExcels(directory);
+            var assetPath = GetAssetAbsolutePath();
+            if (machine is ExcelMachine target)
+            {
+                // check 文件夹
+                string pathRuntime = Application.dataPath + Path.DirectorySeparatorChar + machine.RuntimeClassPath;
+                string pathEditor = Application.dataPath + Path.DirectorySeparatorChar + machine.EditorClassPath;
+                if (!Directory.Exists(pathRuntime))
+                {
+                    Directory.CreateDirectory(pathRuntime);
+                }
+                if (!Directory.Exists(pathEditor))
+                {
+                    Directory.CreateDirectory(pathEditor);
+                }
+
+                foreach (var file in files)
+                {
+                    target.SpreadSheetName = file.Name;
+                    // set relative path
+                    target.excelFilePath = PathHelper.RelativePath(assetPath, file.FullName);
+                    // pass absolute path
+                    target.SheetNames = new ExcelQuery(target.excelFilePath).GetSheetNames();
+                    // 默认第一个sheet
+                    target.WorkSheetName = target.SheetNames[0];
+
+                    ScriptPrescription sp = Generate(machine);
+                    if (sp != null)
+                    {
+                        Debug.Log("Successfully generated!");
+                    }
+                    else
+                        Debug.LogError($"Failed to create a script from excel :{file.Name}");
+                }
             }
         }
 
@@ -301,6 +433,81 @@ namespace UnityQuickSheet
                 writer.Write(new ScriptGenerator(sp).ToString());
                 writer.Close();
             }
+        }
+
+        /// <summary>
+        /// 自行搜索创建所有表格ScriptObject对象
+        /// </summary>
+        public void CreateAllExcelSOByFind()
+        {
+            var allType = FindAllScriptTypeByAttribute<ExcelSOClassAttribute>();
+            ScriptableObject inst = null;
+            foreach (var oneType in allType)
+            {
+                if (oneType.IsGenericTypeDefinition)
+                {
+                    continue;
+                }
+
+                if (AIsExtendsByB(oneType, typeof(ScriptableObject)))
+                {
+                    inst = ScriptableObject.CreateInstance(oneType);
+                    string path = CustomAssetUtility.GetUniqueAssetPathNameOrFallback(ExcelDataFilename);
+                    AssetDatabase.CreateAsset(inst, path);
+                }
+            }
+
+            if (inst != null)
+            {
+                AssetDatabase.SaveAssets();
+                Selection.activeObject = inst;
+            }
+        }
+
+        /// <summary>
+        /// a 是否继承自 b
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public bool AIsExtendsByB(Type a, Type b)
+        {
+            var baseType = a.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.Name == b.Name)
+                {
+                    return true;
+                }
+                else
+                {
+                    baseType = baseType.BaseType;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 拿到所有的表格数据脚本类
+        /// </summary>
+        public List<Type> FindAllScriptTypeByAttribute<T>() where T : Attribute
+        {
+            List<Type> result = new List<Type>();
+
+            var types = Assembly.GetCallingAssembly().GetTypes();
+            var targetT = typeof(T);
+            foreach (var type in types)
+            {
+                var attrs = type.GetCustomAttributes(targetT, false);
+                if (attrs.Length == 0)
+                {
+                    continue;
+                }
+                result.Add(type);
+            }
+
+            return result;
         }
     }
 }

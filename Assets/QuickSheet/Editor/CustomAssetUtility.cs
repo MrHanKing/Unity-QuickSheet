@@ -11,31 +11,36 @@ using System.IO;
 
 public static class CustomAssetUtility
 {
-    public static T CreateAsset<T> () where T : ScriptableObject
+    public static T CreateAsset<T>() where T : ScriptableObject
     {
-        T asset = ScriptableObject.CreateInstance<T> ();
+        T asset = ScriptableObject.CreateInstance<T>();
 
-        string path = AssetDatabase.GetAssetPath (Selection.activeObject);
+        string path = AssetDatabase.GetAssetPath(Selection.activeObject);
         if (path == "")
         {
             path = "Assets";
         }
-        else if (Path.GetExtension (path) != "")
+        else if (Path.GetExtension(path) != "")
         {
-            path = path.Replace (Path.GetFileName (AssetDatabase.GetAssetPath (Selection.activeObject)), "");
+            path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
         }
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath (path + "/New " + typeof(T).ToString() + ".asset");
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/New " + typeof(T).ToString() + ".asset");
 
-        AssetDatabase.CreateAsset (asset, assetPathAndName);
+        AssetDatabase.CreateAsset(asset, assetPathAndName);
 
-        AssetDatabase.SaveAssets ();
-        EditorUtility.FocusProjectWindow ();
+        AssetDatabase.SaveAssets();
+        EditorUtility.FocusProjectWindow();
         Selection.activeObject = asset;
 
         return asset;
     }
 
+    /// <summary>
+    /// 获取选中地方的路径或者保底路径
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <returns></returns>
     public static string GetUniqueAssetPathNameOrFallback(string filename)
     {
         string path;

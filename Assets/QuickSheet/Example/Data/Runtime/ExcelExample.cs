@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityQuickSheet;
 
 ///
 /// !!! Machine generated code !!!
@@ -10,10 +11,10 @@ using System.Collections.Generic;
 /// can be serialized onto an asset data file.
 /// 
 [System.Serializable]
-public class ExcelExample : ExcelTableBase
+public class ExcelExample : ExcelTableBase<ExcelExampleData>
 {
     // Note: initialize in OnEnable() not here.
-    public ExcelExampleData[] dataArray;
+    // public ExcelExampleData[] dataArray;
 
     void OnEnable()
     {

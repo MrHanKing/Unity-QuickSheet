@@ -1,16 +1,25 @@
 using UnityEngine;
 
-/// <summary>
-/// 表格运行时数据结构
-/// </summary>
-[System.Serializable]
-public class ExcelTableBase : ScriptableObject
+namespace UnityQuickSheet
 {
-    [HideInInspector]
-    [SerializeField]
-    public string SheetName = "";
+    /// <summary>
+    /// 表格运行时数据结构
+    /// </summary>
+    [System.Serializable]
+    public class ExcelTableBase : ScriptableObject
+    {
+        [HideInInspector]
+        [SerializeField]
+        public string SheetName = "";
 
-    [HideInInspector]
-    [SerializeField]
-    public string WorksheetName = "";
+        [HideInInspector]
+        [SerializeField]
+        public string WorksheetName = "";
+    }
+
+    [System.Serializable]
+    public class ExcelTableBase<T> : ExcelTableBase
+    {
+        public T[] dataArray;
+    }
 }

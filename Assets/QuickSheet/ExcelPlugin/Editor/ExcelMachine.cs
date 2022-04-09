@@ -23,7 +23,7 @@ namespace UnityQuickSheet
         /// where the .xls or .xlsx file is. The path should start with "Assets/".
         /// </summary>
         public string excelFilePath;
-
+        public string allExcelFilePath;
         // both are needed for popup editor control.
         public string[] SheetNames = { "" };
         public int CurrentSheetIndex
