@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityQuickSheet;
 
 ///
 /// !!! Machine generated code !!!
@@ -10,16 +11,8 @@ using System.Collections.Generic;
 /// can be serialized onto an asset data file.
 /// 
 [System.Serializable]
-public class $ClassName : ScriptableObject 
+public class $ClassName : ExcelTableBase<$DataClassName> 
 {	
-    [HideInInspector] [SerializeField] 
-    public string SheetName = "";
-    
-    [HideInInspector] [SerializeField] 
-    public string WorksheetName = "";
-    
-    // Note: initialize in OnEnable() not here.
-    public $DataClassName[] dataArray;
     
     void OnEnable()
     {		

@@ -89,7 +89,7 @@ namespace UnityQuickSheet
             GUILayout.EndHorizontal();
 
             // Failed to get sheet name so we just return not to make editor on going.
-            if (machine.SheetNames.Length == 0)
+            if (machine.SheetNames != null && machine.SheetNames.Length == 0)
             {
                 EditorGUILayout.Separator();
                 EditorGUILayout.LabelField("Error: Failed to retrieve the specified excel file.");
@@ -300,10 +300,8 @@ namespace UnityQuickSheet
                 foreach (var file in files)
                 {
                     target.SpreadSheetName = file.Name;
-                    // set relative path
-                    target.excelFilePath = PathHelper.RelativePath(assetPath, file.FullName);
                     // pass absolute path
-                    target.SheetNames = new ExcelQuery(target.excelFilePath).GetSheetNames();
+                    target.SheetNames = new ExcelQuery(file.FullName).GetSheetNames();
                     // 默认第一个sheet
                     target.WorkSheetName = target.SheetNames[0];
 
