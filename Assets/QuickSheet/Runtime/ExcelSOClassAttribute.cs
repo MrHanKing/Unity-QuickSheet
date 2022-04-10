@@ -8,6 +8,10 @@ namespace UnityQuickSheet
     [AttributeUsage(AttributeTargets.Class)]
     public class ExcelSOClassAttribute : Attribute
     {
-
+        // public Type classDataType;
+        // public ExcelSOClassAttribute(Type classDataType)
+        // {
+        //     this.classDataType = classDataType;
+        // }
     }
 }

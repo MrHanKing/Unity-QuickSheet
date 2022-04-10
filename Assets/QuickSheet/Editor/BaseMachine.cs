@@ -167,6 +167,10 @@ namespace UnityQuickSheet
 
         [SerializeField]
         private string templatePath = "QuickSheet/Templates";
+        /// <summary>
+        /// 脚本模版位置
+        /// </summary>
+        /// <value></value>
         public string TemplatePath
         {
             get { return templatePath; }
@@ -178,6 +182,10 @@ namespace UnityQuickSheet
         /// </summary>
         [SerializeField]
         private string scriptFilePath;
+        /// <summary>
+        /// 运行时类位置
+        /// </summary>
+        /// <value></value>
         public string RuntimeClassPath
         {
             get { return scriptFilePath; }
@@ -189,10 +197,26 @@ namespace UnityQuickSheet
         /// </summary>
         [SerializeField]
         private string editorScriptFilePath;
+        /// <summary>
+        /// 编辑器脚本位置
+        /// </summary>
+        /// <value></value>
         public string EditorClassPath
         {
             get { return editorScriptFilePath; }
             set { editorScriptFilePath = value; }
+        }
+
+        [SerializeField]
+        private string saveScriptAssetFilePath;
+        /// <summary>
+        /// 编辑器生成的ScriptObject所在位置
+        /// </summary>
+        /// <value></value>
+        public string SaveScriptAssetFilePath
+        {
+            get { return saveScriptAssetFilePath; }
+            set { saveScriptAssetFilePath = value; }
         }
 
         [SerializeField]
@@ -205,6 +229,10 @@ namespace UnityQuickSheet
 
         [SerializeField]
         private string workSheetName;
+        /// <summary>
+        /// 选中sheet的名字
+        /// </summary>
+        /// <value></value>
         public string WorkSheetName
         {
             get { return workSheetName; }

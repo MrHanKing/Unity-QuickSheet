@@ -91,12 +91,30 @@ namespace UnityQuickSheet
         }
 
         /// <summary>
+        /// 获得OS数据结构的类名
+        /// </summary>
+        /// <param name="sheetName"></param>
+        /// <returns></returns>
+        public string GetDataClassName(string sheetName)
+        {
+            return $"{sheetName}Data";
+        }
+        public string GetEditorClassName(string sheetName)
+        {
+            return $"{sheetName}Editor";
+        }
+        public string GetExcelClassName(string sheetName)
+        {
+            return sheetName;
+        }
+
+        /// <summary>
         /// Create a ScriptableObject class and write it down on the specified folder.
         /// </summary>
         protected void CreateScriptableObjectClassScript(BaseMachine machine, ScriptPrescription sp)
         {
-            sp.className = machine.WorkSheetName;
-            sp.dataClassName = machine.WorkSheetName + "Data";
+            sp.className = GetExcelClassName(machine.WorkSheetName);
+            sp.dataClassName = GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("ScriptableObjectClass");
 
             // check the directory path exists
@@ -138,9 +156,9 @@ namespace UnityQuickSheet
         /// </summary>
         protected void CreateScriptableObjectEditorClassScript(BaseMachine machine, ScriptPrescription sp)
         {
-            sp.className = machine.WorkSheetName + "Editor";
+            sp.className = GetEditorClassName(machine.WorkSheetName);
             sp.worksheetClassName = machine.WorkSheetName;
-            sp.dataClassName = machine.WorkSheetName + "Data";
+            sp.dataClassName = GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("ScriptableObjectEditorClass");
 
             // check the directory path exists
@@ -208,7 +226,7 @@ namespace UnityQuickSheet
                 fieldList.Add(member);
             }
 
-            sp.className = machine.WorkSheetName + "Data";
+            sp.className = GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("DataClass");
 
             sp.memberFields = fieldList.ToArray();
@@ -265,6 +283,15 @@ namespace UnityQuickSheet
         protected string TargetPathForAssetPostProcessorFile(string worksheetName)
         {
             return Path.Combine("Assets/" + machine.EditorClassPath, worksheetName + "AssetPostProcessor" + "." + "cs");
+        }
+        /// <summary>
+        /// 获得目标ScriptObject存储位置
+        /// </summary>
+        /// <param name="worksheetName"></param>
+        /// <returns></returns>
+        protected string TargetPathForSOAsset(string worksheetName)
+        {
+            return Path.Combine("Assets/" + machine.SaveScriptAssetFilePath, worksheetName + ".asset");
         }
 
         /// <summary>

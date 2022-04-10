@@ -15,11 +15,13 @@ namespace UnityQuickSheet
         [HideInInspector]
         [SerializeField]
         public string WorksheetName = "";
+
+        public object[] dataArray;
     }
 
     [System.Serializable]
     public class ExcelTableBase<T> : ExcelTableBase
     {
-        public T[] dataArray;
+        public new T[] dataArray;
     }
 }

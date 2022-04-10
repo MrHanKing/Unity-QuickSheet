@@ -11,6 +11,7 @@ using UnityQuickSheet;
 /// can be serialized onto an asset data file.
 /// 
 [System.Serializable]
+[ExcelSOClassAttribute]
 public class $ClassName : ExcelTableBase<$DataClassName> 
 {	
     

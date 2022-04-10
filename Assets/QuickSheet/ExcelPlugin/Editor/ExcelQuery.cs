@@ -100,19 +100,12 @@ namespace UnityQuickSheet
             return string.Empty;
         }
 
-        /// <summary>
-        /// Deserialize all the cell of the given sheet.
-        ///
-        /// NOTE:
-        ///     The first row of a sheet is header column which is not the actual value
-        ///     so it skips when it deserializes.
-        /// </summary>
-        public List<T> Deserialize<T>(int start = 1)
+        public List<object> Deserialize(Type type, int start = 1)
         {
-            var t = typeof(T);
+            var t = type;
             PropertyInfo[] p = t.GetProperties();
 
-            var result = new List<T>();
+            var result = new List<object>();
 
             int current = 0;
             foreach (IRow row in sheet)
@@ -123,7 +116,7 @@ namespace UnityQuickSheet
                     continue;
                 }
 
-                var item = (T)Activator.CreateInstance(t);
+                var item = Activator.CreateInstance(t);
                 for (var i = 0; i < p.Length; i++)
                 {
                     ICell cell = row.GetCell(i);
@@ -153,6 +146,19 @@ namespace UnityQuickSheet
             }
 
             return result;
+        }
+        /// <summary>
+        /// Deserialize all the cell of the given sheet.
+        ///
+        /// NOTE:
+        ///     The first row of a sheet is header column which is not the actual value
+        ///     so it skips when it deserializes.
+        /// </summary>
+        public List<T> Deserialize<T>(int start = 1)
+        {
+            var t = typeof(T);
+
+            return Deserialize(t, start) as List<T>;
         }
 
         /// <summary>

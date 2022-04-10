@@ -15,6 +15,7 @@ MonoBehaviour:
   templatePath: QuickSheet/ExcelPlugin/Templates
   scriptFilePath: QuickSheet/Example/Data/Runtime
   editorScriptFilePath: QuickSheet/Example/Data/Editor
+  saveScriptAssetFilePath: QuickSheet/Example/ExcelData
   sheetName: Example.xls
   workSheetName: ExcelExample
   columnHeaderList:
@@ -35,6 +36,10 @@ MonoBehaviour:
     isEnable: 0
     isArray: 0
   excelFilePath: Assets/QuickSheet/Example/Excel/Example.xls
+  allExcelFilePath: Excels
   SheetNames:
   - ExcelExample
   currentSelectedSheet: 0
+  targetTable: {fileID: 0}
+  m_Tables: []
+  allRowEntryHeader: {fileID: 0}
