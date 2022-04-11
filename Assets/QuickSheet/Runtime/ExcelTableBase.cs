@@ -16,12 +16,12 @@ namespace UnityQuickSheet
         [SerializeField]
         public string WorksheetName = "";
 
-        public object[] dataArray;
+        // public object[] dataArray;
     }
 
     [System.Serializable]
     public class ExcelTableBase<T> : ExcelTableBase
     {
-        public new T[] dataArray;
+        public T[] dataArray;
     }
 }

@@ -99,13 +99,20 @@ namespace UnityQuickSheet
                 return headerCell.StringCellValue;
             return string.Empty;
         }
-
-        public List<object> Deserialize(Type type, int start = 1)
+        /// <summary>
+        /// 反序列话表格数据 结果为List<T>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="start"></param>
+        /// <returns></returns>
+        public object Deserialize(Type type, int start = 1)
         {
             var t = type;
             PropertyInfo[] p = t.GetProperties();
-
-            var result = new List<object>();
+            // var result = new List<object>();
+            var generateType = typeof(List<>).MakeGenericType(type);
+            var resultList = Activator.CreateInstance(generateType);
+            var addMethodInfo = resultList.GetType().GetMethod("Add");
 
             int current = 0;
             foreach (IRow row in sheet)
@@ -140,12 +147,13 @@ namespace UnityQuickSheet
                     }
                 }
 
-                result.Add(item);
+                // result.Add(item);
+                addMethodInfo.Invoke(resultList, new object[] { item });
 
                 current++;
             }
 
-            return result;
+            return resultList;
         }
         /// <summary>
         /// Deserialize all the cell of the given sheet.

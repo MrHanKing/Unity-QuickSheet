@@ -14,7 +14,7 @@ using UnityQuickSheet;
 [ExcelSOClassAttribute]
 public class ExcelExample : ExcelTableBase<ExcelExampleData> 
 {	
-    
+
     void OnEnable()
     {		
 //#if UNITY_EDITOR

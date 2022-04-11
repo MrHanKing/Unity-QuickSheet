@@ -14,7 +14,7 @@ using UnityQuickSheet;
 [ExcelSOClassAttribute]
 public class $ClassName : ExcelTableBase<$DataClassName> 
 {	
-    
+
     void OnEnable()
     {		
 //#if UNITY_EDITOR

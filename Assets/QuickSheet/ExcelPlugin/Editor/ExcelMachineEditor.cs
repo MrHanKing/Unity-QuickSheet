@@ -502,10 +502,10 @@ namespace UnityQuickSheet
                 {
                     var resName = oneType.Name;
                     string path = TargetPathForSOAsset(resName);
-                    ExcelTableBase data = (ExcelTableBase)AssetDatabase.LoadAssetAtPath(path, oneType);
+                    ScriptableObject data = (ScriptableObject)AssetDatabase.LoadAssetAtPath(path, oneType);
                     if (data == null)
                     {
-                        inst = data = ScriptableObject.CreateInstance(oneType) as ExcelTableBase;
+                        inst = data = ScriptableObject.CreateInstance(oneType);
                         AssetDatabase.CreateAsset(inst, path);
                     }
 
@@ -514,11 +514,19 @@ namespace UnityQuickSheet
                     ExcelQuery query = new ExcelQuery(config.excelPath, config.sheetName);
                     if (query != null && query.IsValid())
                     {
+
+                        FieldInfo pc = oneType.GetField("dataArray");
+
                         var args = oneType.BaseType.GetGenericArguments();
-                        if (args.Length == 1)
+                        if (args.Length == 1 && pc.FieldType.IsArray)
                         {
                             var dataType = args[0];
-                            data.dataArray = query.Deserialize(dataType).ToArray();
+                            // 显式转换类型
+                            var targetListData = query.Deserialize(dataType);
+                            var targetData = targetListData.GetType().GetMethod("ToArray").Invoke(targetListData, new object[] { });
+
+                            pc.SetValue(data, targetData);
+                            // data.dataArray = query.Deserialize(dataType).ToArray();
                             EditorUtility.SetDirty(data);
                         }
                         else
