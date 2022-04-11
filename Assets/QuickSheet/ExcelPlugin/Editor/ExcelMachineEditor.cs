@@ -42,11 +42,13 @@ namespace UnityQuickSheet
         /// <typeparam name="GenerateExcelData"></typeparam>
         /// <returns></returns>
         private List<GenerateExcelData> generateExcelDatas = new List<GenerateExcelData>();
+        private ExcelMachine machine1;
         protected override void OnEnable()
         {
             base.OnEnable();
 
             machine = target as ExcelMachine;
+            machine1 = target as ExcelMachine;
             if (machine != null && ExcelSettings.Instance != null)
             {
                 if (string.IsNullOrEmpty(ExcelSettings.Instance.RuntimePath) == false)
@@ -54,6 +56,37 @@ namespace UnityQuickSheet
                 if (string.IsNullOrEmpty(ExcelSettings.Instance.EditorPath) == false)
                     machine.EditorClassPath = ExcelSettings.Instance.EditorPath;
             }
+        }
+
+        /// <summary>
+        /// 选择单张表的路径
+        /// </summary>
+        private void DrawOneExcelSelected()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("File:", GUILayout.Width(50));
+
+            string path = string.Empty;
+            if (string.IsNullOrEmpty(machine1.excelFilePath))
+                path = Application.dataPath;
+            else
+                path = machine1.excelFilePath;
+
+            machine1.excelFilePath = GUILayout.TextField(path, GUILayout.Width(250));
+            var folderSelect = SelectFolderButton(path);
+            if (!string.IsNullOrWhiteSpace(folderSelect))
+            {
+                machine.SpreadSheetName = Path.GetFileName(path);
+                var absolutePath = Path.GetFullPath(path);
+
+                // set relative path
+                machine1.excelFilePath = PathHelper.RelativePath(Application.dataPath, absolutePath);
+
+                // pass absolute path
+                machine1.SheetNames = new ExcelQuery(absolutePath).GetSheetNames();
+            }
+
+            GUILayout.EndHorizontal();
         }
 
         public override void OnInspectorGUI()
@@ -64,49 +97,7 @@ namespace UnityQuickSheet
 
             GUILayout.Label("Excel Spreadsheet Settings:", headerStyle);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("File:", GUILayout.Width(50));
-
-            string path = string.Empty;
-            if (string.IsNullOrEmpty(machine.excelFilePath))
-                path = Application.dataPath;
-            else
-                path = machine.excelFilePath;
-
-            machine.excelFilePath = GUILayout.TextField(path, GUILayout.Width(250));
-            if (GUILayout.Button("...", GUILayout.Width(20)))
-            {
-                string folder = Path.GetDirectoryName(path);
-#if UNITY_EDITOR_WIN
-                path = EditorUtility.OpenFilePanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
-#else // for UNITY_EDITOR_OSX
-                path = EditorUtility.OpenFilePanel("Open Excel file", folder, "xls");
-#endif
-                if (path.Length != 0)
-                {
-                    machine.SpreadSheetName = Path.GetFileName(path);
-
-                    // the path should be relative not absolute one to make it work on any platform.
-                    int index = path.IndexOf("Assets");
-                    if (index >= 0)
-                    {
-                        // set relative path
-                        machine.excelFilePath = path.Substring(index);
-
-                        // pass absolute path
-                        machine.SheetNames = new ExcelQuery(path).GetSheetNames();
-                    }
-                    else
-                    {
-                        EditorUtility.DisplayDialog("Error",
-                            @"Wrong folder is selected.
-                        Set a folder under the 'Assets' folder! \n
-                        The excel file should be anywhere under  the 'Assets' folder", "OK");
-                        return;
-                    }
-                }
-            }
-            GUILayout.EndHorizontal();
+            DrawOneExcelSelected();
 
             // Failed to get sheet name so we just return not to make editor on going.
             if (machine.SheetNames != null && machine.SheetNames.Length == 0)
@@ -122,6 +113,7 @@ namespace UnityQuickSheet
 
             EditorGUILayout.Space();
 
+            // 选择Sheet
             using (new GUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Worksheet: ", GUILayout.Width(100));
@@ -132,7 +124,7 @@ namespace UnityQuickSheet
                 if (GUILayout.Button("Refresh", GUILayout.Width(60)))
                 {
                     // reopen the excel file e.g) new worksheet is added so need to reopen.
-                    machine.SheetNames = new ExcelQuery(machine.excelFilePath).GetSheetNames();
+                    machine.SheetNames = new ExcelQuery(Path.GetFullPath(machine.excelFilePath)).GetSheetNames();
 
                     // one of worksheet was removed, so reset the selected worksheet index
                     // to prevent the index out of range error.
@@ -203,11 +195,11 @@ namespace UnityQuickSheet
                     Debug.LogError("Failed to create a script from excel.");
             }
 
-            var targetDirectoryInfo = FilePathSelected();
+            FilePathSelected();
 
             if (GUILayout.Button("GenerateAllClass"))
             {
-                FindAllExcelData(targetDirectoryInfo);
+                FindAllExcelData();
                 GenerateAllClass();
             }
             if (GUILayout.Button("GenerateAllObjectScript"))
@@ -224,53 +216,80 @@ namespace UnityQuickSheet
         /// <summary>
         /// 文件路径选择器
         /// </summary>
-        /// <returns></returns>
-        private DirectoryInfo FilePathSelected()
+        /// <returns>Excel的相对路径</returns>
+        private string FilePathSelected()
         {
-            DirectoryInfo targetDirectory = null;
             //选择所有表格所在路径
             GUILayout.BeginHorizontal();
-            GUILayout.Label("File:", GUILayout.Width(50));
+            GUILayout.Label("全表格所在目录:", GUILayout.Width(50));
             ExcelMachine machine = target as ExcelMachine;
             string path = string.Empty;
             if (string.IsNullOrEmpty(machine.allExcelFilePath))
             {
+                var absolutePath = GetProjectAbsolutePath();
                 path = Application.dataPath;
-                targetDirectory = new DirectoryInfo(path);
+                path = PathHelper.RelativePath(absolutePath, path);
             }
             else
             {
                 path = machine.allExcelFilePath;
-                var excelsPath = Path.GetFullPath(path);
-                targetDirectory = new DirectoryInfo(excelsPath);
             }
 
             var with = Mathf.Max(250, path.Length * 10);
             machine.allExcelFilePath = GUILayout.TextField(path, GUILayout.Width(with));
-
-            if (GUILayout.Button("...", GUILayout.Width(20)))
+            var openPath = Path.GetFullPath(path);
+            var resultStr = SelectFolderButton(openPath);
+            if (!string.IsNullOrWhiteSpace(resultStr))
             {
-                string folder = Path.GetDirectoryName(path);
-#if UNITY_EDITOR_WIN
-                path = EditorUtility.OpenFolderPanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
-#else // for UNITY_EDITOR_OSX
-                path = EditorUtility.OpenFolderPanel("Open Excel file", folder, "xls");
-#endif
-                Debug.Log(path);
-
                 // 获得相对路径储存
                 var absolutePath = GetProjectAbsolutePath();
-                machine.allExcelFilePath = PathHelper.RelativePath(absolutePath, path);
-                Debug.Log("aaa:" + machine.allExcelFilePath);
-
-                // 收集所有表格
-                targetDirectory = new DirectoryInfo(path);
+                machine.allExcelFilePath = PathHelper.RelativePath(absolutePath, resultStr);
+                Debug.Log("选择Excel文件夹:" + machine.allExcelFilePath);
             }
+
             GUILayout.EndHorizontal();
+
+            return machine.allExcelFilePath;
+        }
+
+        /// <summary>
+        /// 选择路径按钮
+        /// </summary>
+        /// <returns></returns>
+        private string SelectFolderButton(string openPath)
+        {
+            if (GUILayout.Button("...", GUILayout.Width(20)))
+            {
+                string folder = Path.GetDirectoryName(openPath);
+#if UNITY_EDITOR_WIN
+                folder = EditorUtility.OpenFolderPanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
+#else // for UNITY_EDITOR_OSX
+                folder = EditorUtility.OpenFolderPanel("Open Excel file", folder, "xls");
+#endif
+                return folder;
+            }
+            return default;
+        }
+
+        private DirectoryInfo GetAllExcelPathDirectory()
+        {
+            // 拿到的是相对路径
+            var path = (target as ExcelMachine).allExcelFilePath;
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError("请选择好Excel的文件路径");
+                return null;
+            }
+            var excelsPath = Path.GetFullPath(path);
+            var targetDirectory = new DirectoryInfo(excelsPath);
 
             return targetDirectory;
         }
 
+        /// <summary>
+        /// 获得项目路径
+        /// </summary>
+        /// <returns></returns>
         private string GetProjectAbsolutePath()
         {
             // 获得相对路径储存
@@ -299,9 +318,19 @@ namespace UnityQuickSheet
             }
             return _allFilePaths;
         }
-
+        /// <summary>
+        /// 查找数据
+        /// </summary>
+        /// <param name="OSClassName"></param>
+        /// <returns></returns>
         private GenerateExcelData FindGenerateExcelByOSClassName(string OSClassName)
         {
+            // check
+            if (this.generateExcelDatas.Count <= 0)
+            {
+                this.FindAllExcelData();
+            }
+
             foreach (var generateData in this.generateExcelDatas)
             {
                 if (generateData.className == OSClassName)
@@ -311,9 +340,15 @@ namespace UnityQuickSheet
             }
             return new GenerateExcelData();
         }
-
-        private List<GenerateExcelData> FindAllExcelData(DirectoryInfo directory)
+        /// <summary>
+        /// 查找所有excel数据
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <returns></returns>
+        private List<GenerateExcelData> FindAllExcelData()
         {
+            var directory = new DirectoryInfo(Path.GetFullPath((target as ExcelMachine).allExcelFilePath));
+
             var files = FindAllExcels(directory);
             var assetPath = GetProjectAbsolutePath();
             foreach (var file in files)
@@ -390,13 +425,79 @@ namespace UnityQuickSheet
                 return;
             }
 
-            int startRowIndex = 0;
+            var titleList = GetExcelTitles(new ExcelQuery(path, sheet));
+
+            if (machine.HasColumnHeader() && reimport == false)
+            {
+                var headerDic = machine.ColumnHeaderList.ToDictionary(header => header.name);
+                var reCountHeader = ReCountColumnHeader(headerDic, titleList);
+
+                machine.ColumnHeaderList.Clear();
+                machine.ColumnHeaderList = reCountHeader;
+            }
+            else
+            {
+                machine.ColumnHeaderList.Clear();
+                machine.ColumnHeaderList = ReCountColumnHeader(titleList, sheet);
+            }
+
+            EditorUtility.SetDirty(machine);
+            AssetDatabase.SaveAssets();
+        }
+
+        public List<ColumnHeader> ReCountColumnHeader(List<string> newTitleList, string sheetName)
+        {
+            if (newTitleList.Count > 0)
+            {
+                int order = 0;
+                return newTitleList.Select(e => ParseColumnHeader(e, order++)).ToList();
+            }
+            else
+            {
+                string msg = string.Format("An empty workhheet: [{0}] ", sheetName);
+                Debug.LogWarning(msg);
+            }
+            return default;
+        }
+
+        /// <summary>
+        /// 重新计算表格列头数据
+        /// </summary>
+        /// <param name="oldHeaderDic">老的头数据</param>
+        /// <param name="newTitleList">新的头列表string</param>
+        /// <returns></returns>
+        public List<ColumnHeader> ReCountColumnHeader(Dictionary<string, ColumnHeader> oldHeaderDic, List<string> newTitleList)
+        {
+            // 老的没变的列
+            var exist = newTitleList.Select(t => GetColumnHeaderString(t))
+                .Where(e => oldHeaderDic.ContainsKey(e) == true)
+                .Select(t => new ColumnHeader { name = t, type = oldHeaderDic[t].type, isArray = oldHeaderDic[t].isArray, OrderNO = oldHeaderDic[t].OrderNO });
+
+
+            // 新增加的列
+            var changed = newTitleList.Select(t => GetColumnHeaderString(t))
+                .Where(e => oldHeaderDic.ContainsKey(e) == false)
+                .Select(t => ParseColumnHeader(t, newTitleList.IndexOf(t)));
+
+            // merge two list via LINQ
+            var merged = exist.Union(changed).OrderBy(x => x.OrderNO);
+            return merged.ToList();
+        }
+
+        /// <summary>
+        /// 获取excel的表头
+        /// </summary>
+        /// <param name="excelQuery">excel表数据</param>
+        /// <param name="titleRowIndex">header所在行</param>
+        /// <returns></returns>
+        private List<string> GetExcelTitles(ExcelQuery excelQuery, int titleRowIndex = 0)
+        {
             string error = string.Empty;
-            var titles = new ExcelQuery(path, sheet).GetTitle(startRowIndex, ref error);
+            var titles = excelQuery.GetTitle(titleRowIndex, ref error);
             if (titles == null || !string.IsNullOrEmpty(error))
             {
                 EditorUtility.DisplayDialog("Error", error, "OK");
-                return;
+                return default;
             }
             else
             {
@@ -407,51 +508,13 @@ namespace UnityQuickSheet
                     {
                         error = string.Format(@"Invalid column header name {0}. Any c# keyword should not be used for column header. Note it is not case sensitive.", column);
                         EditorUtility.DisplayDialog("Error", error, "OK");
-                        return;
+                        return default;
                     }
                 }
             }
 
             List<string> titleList = titles.ToList();
-
-            if (machine.HasColumnHeader() && reimport == false)
-            {
-                var headerDic = machine.ColumnHeaderList.ToDictionary(header => header.name);
-
-                // collect non-changed column headers
-                var exist = titleList.Select(t => GetColumnHeaderString(t))
-                    .Where(e => headerDic.ContainsKey(e) == true)
-                    .Select(t => new ColumnHeader { name = t, type = headerDic[t].type, isArray = headerDic[t].isArray, OrderNO = headerDic[t].OrderNO });
-
-
-                // collect newly added or changed column headers
-                var changed = titleList.Select(t => GetColumnHeaderString(t))
-                    .Where(e => headerDic.ContainsKey(e) == false)
-                    .Select(t => ParseColumnHeader(t, titleList.IndexOf(t)));
-
-                // merge two list via LINQ
-                var merged = exist.Union(changed).OrderBy(x => x.OrderNO);
-
-                machine.ColumnHeaderList.Clear();
-                machine.ColumnHeaderList = merged.ToList();
-            }
-            else
-            {
-                machine.ColumnHeaderList.Clear();
-                if (titleList.Count > 0)
-                {
-                    int order = 0;
-                    machine.ColumnHeaderList = titleList.Select(e => ParseColumnHeader(e, order++)).ToList();
-                }
-                else
-                {
-                    string msg = string.Format("An empty workhheet: [{0}] ", sheet);
-                    Debug.LogWarning(msg);
-                }
-            }
-
-            EditorUtility.SetDirty(machine);
-            AssetDatabase.SaveAssets();
+            return titleList;
         }
 
         /// <summary>
@@ -502,10 +565,10 @@ namespace UnityQuickSheet
                 {
                     var resName = oneType.Name;
                     string path = TargetPathForSOAsset(resName);
-                    ScriptableObject data = (ScriptableObject)AssetDatabase.LoadAssetAtPath(path, oneType);
+                    ExcelTableBase data = (ExcelTableBase)AssetDatabase.LoadAssetAtPath(path, oneType);
                     if (data == null)
                     {
-                        inst = data = ScriptableObject.CreateInstance(oneType);
+                        inst = data = (ExcelTableBase)ScriptableObject.CreateInstance(oneType);
                         AssetDatabase.CreateAsset(inst, path);
                     }
 
@@ -514,9 +577,11 @@ namespace UnityQuickSheet
                     ExcelQuery query = new ExcelQuery(config.excelPath, config.sheetName);
                     if (query != null && query.IsValid())
                     {
+                        // 设置数据
+                        data.SheetName = config.excelPath;
+                        data.WorksheetName = config.sheetName;
 
                         FieldInfo pc = oneType.GetField("dataArray");
-
                         var args = oneType.BaseType.GetGenericArguments();
                         if (args.Length == 1 && pc.FieldType.IsArray)
                         {

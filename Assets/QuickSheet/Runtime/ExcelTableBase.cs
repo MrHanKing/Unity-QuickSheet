@@ -8,10 +8,15 @@ namespace UnityQuickSheet
     [System.Serializable]
     public class ExcelTableBase : ScriptableObject
     {
+        /// <summary>
+        /// 相对Asset路径的文件位置
+        /// </summary>
         [HideInInspector]
         [SerializeField]
         public string SheetName = "";
-
+        /// <summary>
+        /// 使用的sheetName
+        /// </summary>
         [HideInInspector]
         [SerializeField]
         public string WorksheetName = "";

@@ -46,6 +46,7 @@ namespace UnityQuickSheet
         public ColumnHeader nextArrayItem;
 
         // used to order columns by ascending. (only need on excel-plugin)
+        // 列的位置index
         public int OrderNO { get; set; }
 
         public override string ToString()
@@ -221,6 +222,10 @@ namespace UnityQuickSheet
 
         [SerializeField]
         private string sheetName;
+        /// <summary>
+        /// 电子表格名字
+        /// </summary>
+        /// <value></value>
         public string SpreadSheetName
         {
             get { return sheetName; }

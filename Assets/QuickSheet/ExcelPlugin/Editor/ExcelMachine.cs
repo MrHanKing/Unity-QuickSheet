@@ -20,9 +20,12 @@ namespace UnityQuickSheet
     public class ExcelMachine : BaseMachine
     {
         /// <summary>
-        /// where the .xls or .xlsx file is. The path should start with "Assets/".
+        /// 选中excel的单个文件的相对路径 相对于 "Assets/".
         /// </summary>
         public string excelFilePath;
+        /// <summary>
+        /// Excel文件夹相对于项目的相对路径
+        /// </summary>
         public string allExcelFilePath;
         // both are needed for popup editor control.
         public string[] SheetNames = { "" };
