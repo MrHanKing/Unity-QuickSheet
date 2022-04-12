@@ -382,11 +382,15 @@ namespace UnityQuickSheet
                 foreach (var excelData in this.generateExcelDatas)
                 {
                     // Todo 优化
+                    var excelQ = new ExcelQuery(excelData.excelPath);
                     target.SpreadSheetName = Path.GetFileName(excelData.excelPath);
                     // pass absolute path
-                    target.SheetNames = new ExcelQuery(excelData.excelPath).GetSheetNames();
+                    target.SheetNames = excelQ.GetSheetNames();
                     // 默认第一个sheet
                     target.WorkSheetName = target.SheetNames[0];
+                    // 刷新列信息
+                    var titleList = GetExcelTitles(excelQ.ChangeSheet(target.WorkSheetName));
+                    target.ColumnHeaderList = ReCountColumnHeader(titleList, target.WorkSheetName);
 
                     ScriptPrescription sp = Generate(machine);
                     if (sp != null)

@@ -25,7 +25,7 @@ namespace UnityQuickSheet
     public class ExcelQuery
     {
         private readonly IWorkbook workbook = null;
-        private readonly ISheet sheet = null;
+        private ISheet sheet = null;
         private string filepath = string.Empty;
 
         /// <summary>
@@ -54,13 +54,7 @@ namespace UnityQuickSheet
                         throw new Exception("Wrong file.");
                     }
 
-                    //NOTE: An empty sheetName can be available. Nothing to do with an empty sheetname.
-                    if (!string.IsNullOrEmpty(sheetName))
-                    {
-                        sheet = workbook.GetSheet(sheetName);
-                        if (sheet == null)
-                            Debug.LogErrorFormat("Cannot find sheet '{0}'.", sheetName);
-                    }
+                    this.ChangeSheet(sheetName);
 
                     this.filepath = path;
                 }
@@ -80,6 +74,18 @@ namespace UnityQuickSheet
                 return true;
 
             return false;
+        }
+
+        public ExcelQuery ChangeSheet(string sheetName)
+        {
+            //NOTE: An empty sheetName can be available. Nothing to do with an empty sheetname.
+            if (!string.IsNullOrEmpty(sheetName))
+            {
+                sheet = workbook.GetSheet(sheetName);
+                if (sheet == null)
+                    Debug.LogErrorFormat("Cannot find sheet '{0}'.", sheetName);
+            }
+            return this;
         }
 
         /// <summary>
