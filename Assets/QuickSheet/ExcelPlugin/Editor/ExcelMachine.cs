@@ -10,6 +10,7 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.IO;
 
 namespace UnityQuickSheet
 {
@@ -23,6 +24,11 @@ namespace UnityQuickSheet
         /// 选中excel的单个文件的相对路径 相对于 "Assets/".
         /// </summary>
         public string excelFilePath;
+        /// <summary>
+        /// excel相对项目的路径
+        /// </summary>
+        /// <returns></returns>
+        public string ExcelProjectFilePath() => Path.Combine("Asset/", excelFilePath);
         /// <summary>
         /// Excel文件夹相对于项目的相对路径
         /// </summary>

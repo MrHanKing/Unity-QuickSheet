@@ -35,7 +35,7 @@ MonoBehaviour:
     name: Difficulty
     isEnable: 0
     isArray: 0
-  excelFilePath: Assets/QuickSheet/Example/Excel/Example.xls
+  excelFilePath: ../Excels/Example.xls
   allExcelFilePath: Excels
   SheetNames:
   - ExcelExample

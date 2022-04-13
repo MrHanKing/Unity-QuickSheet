@@ -73,11 +73,11 @@ namespace UnityQuickSheet
                 path = machine1.excelFilePath;
 
             machine1.excelFilePath = GUILayout.TextField(path, GUILayout.Width(250));
-            var folderSelect = SelectFolderButton(path);
+            var folderSelect = SelectFileButton(path);
             if (!string.IsNullOrWhiteSpace(folderSelect))
             {
-                machine.SpreadSheetName = Path.GetFileName(path);
-                var absolutePath = Path.GetFullPath(path);
+                machine.SpreadSheetName = Path.GetFileName(folderSelect);
+                var absolutePath = Path.GetFullPath(folderSelect);
 
                 // set relative path
                 machine1.excelFilePath = PathHelper.RelativePath(Application.dataPath, absolutePath);
@@ -124,7 +124,7 @@ namespace UnityQuickSheet
                 if (GUILayout.Button("Refresh", GUILayout.Width(60)))
                 {
                     // reopen the excel file e.g) new worksheet is added so need to reopen.
-                    machine.SheetNames = new ExcelQuery(Path.GetFullPath(machine.excelFilePath)).GetSheetNames();
+                    machine.SheetNames = new ExcelQuery(Path.GetFullPath(machine.ExcelProjectFilePath())).GetSheetNames();
 
                     // one of worksheet was removed, so reset the selected worksheet index
                     // to prevent the index out of range error.
@@ -253,7 +253,7 @@ namespace UnityQuickSheet
         }
 
         /// <summary>
-        /// 选择路径按钮
+        /// 选择文件夹按钮
         /// </summary>
         /// <returns></returns>
         private string SelectFolderButton(string openPath)
@@ -265,6 +265,25 @@ namespace UnityQuickSheet
                 folder = EditorUtility.OpenFolderPanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
 #else // for UNITY_EDITOR_OSX
                 folder = EditorUtility.OpenFolderPanel("Open Excel file", folder, "xls");
+#endif
+                return folder;
+            }
+            return default;
+        }
+        /// <summary>
+        /// 打开文件按钮
+        /// </summary>
+        /// <param name="openPath"></param>
+        /// <returns></returns>
+        private string SelectFileButton(string openPath)
+        {
+            if (GUILayout.Button("...", GUILayout.Width(20)))
+            {
+                string folder = Path.GetDirectoryName(Path.GetFullPath(openPath));
+#if UNITY_EDITOR_WIN
+                folder = EditorUtility.OpenFilePanel("Open Excel file", folder, "excel files;*.xls;*.xlsx");
+#else // for UNITY_EDITOR_OSX
+                folder = EditorUtility.OpenFilePanel("Open Excel file", folder, "xls");
 #endif
                 return folder;
             }
@@ -412,7 +431,7 @@ namespace UnityQuickSheet
         {
             ExcelMachine machine = target as ExcelMachine;
 
-            string path = machine.excelFilePath;
+            string path = Path.GetFullPath(machine.ExcelProjectFilePath());
             string sheet = machine.WorkSheetName;
 
             if (string.IsNullOrEmpty(path))
