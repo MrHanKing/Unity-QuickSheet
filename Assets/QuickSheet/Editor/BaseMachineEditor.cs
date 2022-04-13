@@ -91,30 +91,12 @@ namespace UnityQuickSheet
         }
 
         /// <summary>
-        /// 获得OS数据结构的类名
-        /// </summary>
-        /// <param name="sheetName"></param>
-        /// <returns></returns>
-        public string GetDataClassName(string sheetName)
-        {
-            return $"{sheetName}Data";
-        }
-        public string GetEditorClassName(string sheetName)
-        {
-            return $"{sheetName}Editor";
-        }
-        public string GetExcelClassName(string sheetName)
-        {
-            return sheetName;
-        }
-
-        /// <summary>
         /// Create a ScriptableObject class and write it down on the specified folder.
         /// </summary>
         protected void CreateScriptableObjectClassScript(BaseMachine machine, ScriptPrescription sp)
         {
-            sp.className = GetExcelClassName(machine.WorkSheetName);
-            sp.dataClassName = GetDataClassName(machine.WorkSheetName);
+            sp.className = ExcelMachineHelper.GetExcelClassName(machine.WorkSheetName);
+            sp.dataClassName = ExcelMachineHelper.GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("ScriptableObjectClass");
 
             // check the directory path exists
@@ -156,9 +138,9 @@ namespace UnityQuickSheet
         /// </summary>
         protected void CreateScriptableObjectEditorClassScript(BaseMachine machine, ScriptPrescription sp)
         {
-            sp.className = GetEditorClassName(machine.WorkSheetName);
+            sp.className = ExcelMachineHelper.GetEditorClassName(machine.WorkSheetName);
             sp.worksheetClassName = machine.WorkSheetName;
-            sp.dataClassName = GetDataClassName(machine.WorkSheetName);
+            sp.dataClassName = ExcelMachineHelper.GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("ScriptableObjectEditorClass");
 
             // check the directory path exists
@@ -226,7 +208,7 @@ namespace UnityQuickSheet
                 fieldList.Add(member);
             }
 
-            sp.className = GetDataClassName(machine.WorkSheetName);
+            sp.className = ExcelMachineHelper.GetDataClassName(machine.WorkSheetName);
             sp.template = GetTemplate("DataClass");
 
             sp.memberFields = fieldList.ToArray();
