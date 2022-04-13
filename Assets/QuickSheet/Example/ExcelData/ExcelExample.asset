@@ -18,40 +18,50 @@ MonoBehaviour:
   - id: 0
     name: Goblin
     strength: 5
-    difficulty: Easy
+    difficulty: 0
+    some: 01000000020000000300000004000000050000000600000007000000
   - id: 1
     name: Wolf
     strength: 5
-    difficulty: Easy
+    difficulty: 0
+    some: 01000000020000000300000004000000050000000600000008000000
   - id: 2
     name: Scavanger
     strength: 7
-    difficulty: Easy
+    difficulty: 0
+    some: 01000000020000000300000004000000050000000600000009000000
   - id: 3
     name: Lurker
     strength: 9
-    difficulty: Easy
+    difficulty: 0
+    some: 0100000002000000030000000400000005000000060000000a000000
   - id: 4
     name: Sceleton
     strength: 11
-    difficulty: Medium
+    difficulty: 1
+    some: 0100000002000000030000000400000005000000060000000b000000
   - id: 5
     name: Ghost
     strength: 13
-    difficulty: Medium
+    difficulty: 1
+    some: 0100000002000000030000000400000005000000060000000c000000
   - id: 6
     name: Orc
     strength: 15
-    difficulty: Medium
+    difficulty: 1
+    some: 0100000002000000030000000400000005000000060000000d000000
   - id: 7
     name: Hydra
     strength: 17
-    difficulty: Hard
+    difficulty: 2
+    some: 0100000002000000030000000400000005000000060000000e000000
   - id: 8
     name: Undead
     strength: 19
-    difficulty: Hard
+    difficulty: 2
+    some: 0100000002000000030000000400000005000000060000000f000000
   - id: 9
     name: Dragon
     strength: 21
-    difficulty: Hard
+    difficulty: 2
+    some: 01000000020000000300000004000000050000000600000010000000

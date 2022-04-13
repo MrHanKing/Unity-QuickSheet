@@ -9,19 +9,23 @@ using System.Collections;
 public class ExcelExampleData
 {
   [SerializeField]
-  string id;
-  public string Id { get {return id; } set { this.id = value;} }
+  int id;
+  public int Id { get {return id; } set { this.id = value;} }
   
   [SerializeField]
   string name;
   public string Name { get {return name; } set { this.name = value;} }
   
   [SerializeField]
-  string strength;
-  public string Strength { get {return strength; } set { this.strength = value;} }
+  int strength;
+  public int Strength { get {return strength; } set { this.strength = value;} }
   
   [SerializeField]
-  string difficulty;
-  public string Difficulty { get {return difficulty; } set { this.difficulty = value;} }
+  Difficulty difficulty;
+  public Difficulty DIFFICULTY { get {return difficulty; } set { this.difficulty = value;} }
+  
+  [SerializeField]
+  int[] some = new int[0];
+  public int[] Some { get {return some; } set { this.some = value;} }
   
 }

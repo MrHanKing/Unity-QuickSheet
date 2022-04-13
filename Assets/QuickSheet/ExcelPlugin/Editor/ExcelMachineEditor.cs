@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Compilation;
+using System.Collections;
 
 namespace UnityQuickSheet
 {
@@ -371,8 +372,6 @@ namespace UnityQuickSheet
                 }
             }
         }
-
-
 
         /// <summary>
         /// Import the specified excel file and prepare to set type of each cell.
