@@ -12,33 +12,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80e14a72067f1ad408ec8d661bc560ce, type: 3}
   m_Name: ExcelExampleImporter
   m_EditorClassIdentifier: 
-  templatePath: QuickSheet/ExcelPlugin/Templates
-  scriptFilePath: QuickSheet/Example/Data/Runtime
-  editorScriptFilePath: QuickSheet/Example/Data/Editor
-  saveScriptAssetFilePath: QuickSheet/Example/ExcelData
-  sheetName: Example.xls
-  workSheetName: ExcelExample
+  sheetName: Example2.xls
+  workSheetName: SomeData
   columnHeaderList:
-  - type: 3
+  - type: 0
     name: Id
     isEnable: 0
     isArray: 0
-  - type: 1
+  - type: 0
     name: Name
     isEnable: 0
     isArray: 0
-  - type: 5
+  - type: 0
     name: Strength
     isEnable: 0
     isArray: 0
-  - type: 7
+  - type: 0
     name: Difficulty
+    isEnable: 0
+    isArray: 0
+  - type: 0
+    name: Hello
     isEnable: 0
     isArray: 0
   excelFilePath: ../Excels/Example.xls
   allExcelFilePath: Excels
   SheetNames:
-  - ExcelExample
+  - SomeData
   currentSelectedSheet: 0
   targetTable: {fileID: 0}
   m_Tables: []

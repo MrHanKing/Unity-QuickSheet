@@ -1,6 +1,8 @@
 
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
 using static UnityQuickSheet.ExcelMachineEditor;
 
 namespace UnityQuickSheet
@@ -85,5 +87,75 @@ namespace UnityQuickSheet
             }
             return result;
         }
+
+        #region 路径相关
+        /// <summary>
+        /// e.g. "Assets/Script/Data/Runtime/Item.cs"
+        /// </summary>
+        public static string TargetPathForClassScript(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.RuntimePath, worksheetName + "." + "cs");
+        }
+
+        /// <summary>
+        /// e.g. "Assets/Script/Data/Editor/ItemEditor.cs"
+        /// </summary>
+        public static string TargetPathForEditorScript(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.EditorPath, worksheetName + "Editor" + "." + "cs");
+        }
+
+        /// <summary>
+        /// data class script file has 'WorkSheetNameData' for its filename.
+        /// e.g. "Assets/Script/Data/Runtime/ItemData.cs"
+        /// </summary>
+        public static string TargetPathForData(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.RuntimePath, worksheetName + "Data" + "." + "cs");
+        }
+
+        /// <summary>
+        /// e.g. "Assets/Script/Data/Editor/ItemAssetCreator.cs"
+        /// </summary>
+        public static string TargetPathForAssetFileCreateFunc(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.EditorPath, worksheetName + "AssetCreator" + "." + "cs");
+        }
+
+        /// <summary>
+        /// AssetPostprocessor class should be under "Editor" folder.
+        /// </summary>
+        public static string TargetPathForAssetPostProcessorFile(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.EditorPath, worksheetName + "AssetPostProcessor" + "." + "cs");
+        }
+        /// <summary>
+        /// 获得目标ScriptObject存储位置
+        /// </summary>
+        /// <param name="worksheetName"></param>
+        /// <returns></returns>
+        public static string TargetPathForSOAsset(string worksheetName)
+        {
+            return Path.Combine("Assets/" + ExcelSettings.Instance.SaveScriptAssetFilePath, worksheetName + ".asset");
+        }
+
+        /// <summary>
+        /// 获取Assets内自定义模版
+        /// e.g. "Assets/QuickSheet/Templates"
+        /// </summary>
+        public static string GetAbsoluteCustomTemplatePath()
+        {
+            return Path.Combine(Application.dataPath, ExcelSettings.Instance.TemplatePath);
+        }
+
+        /// <summary>
+        /// 获取Unity内建模版
+        /// e.g. "C:/Program File(x86)/Unity/Editor/Data"
+        /// </summary>
+        public static string GetAbsoluteBuiltinTemplatePath()
+        {
+            return Path.Combine(EditorApplication.applicationContentsPath, ExcelSettings.Instance.TemplatePath);
+        }
+        #endregion
     }
 }

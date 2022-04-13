@@ -12,15 +12,17 @@ namespace UnityQuickSheet
         [DidReloadScripts]
         public static void Listen()
         {
-
-            Debug.Log("Try Listen SO");
             var isGenerate = EditorPrefsSaveData.GetIsGenerateSOKey();
-            Debug.Log("Try Listen SO" + isGenerate);
+
             if (isGenerate)
             {
                 Debug.Log("Try Generate SO");
-
-
+                var allExcelPath = EditorPrefsSaveData.AllExcelFilePath;
+                if (!string.IsNullOrWhiteSpace(EditorPrefsSaveData.AllExcelFilePath))
+                {
+                    var generateExcelDatas = ExcelMachineHelper.FindAllExcelData(allExcelPath);
+                    ExcelMachineEditor.RefreshAllExcelSOByFind(generateExcelDatas);
+                }
 
                 EditorPrefsSaveData.SetIsGenerateSOKey(false);
             }

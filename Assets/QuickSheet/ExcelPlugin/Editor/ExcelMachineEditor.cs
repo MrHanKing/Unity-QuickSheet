@@ -49,13 +49,6 @@ namespace UnityQuickSheet
 
             machine = target as ExcelMachine;
             machine1 = target as ExcelMachine;
-            if (machine != null && ExcelSettings.Instance != null)
-            {
-                if (string.IsNullOrEmpty(ExcelSettings.Instance.RuntimePath) == false)
-                    machine.RuntimeClassPath = ExcelSettings.Instance.RuntimePath;
-                if (string.IsNullOrEmpty(ExcelSettings.Instance.EditorPath) == false)
-                    machine.EditorClassPath = ExcelSettings.Instance.EditorPath;
-            }
         }
 
         /// <summary>
@@ -165,10 +158,10 @@ namespace UnityQuickSheet
 
             GUILayout.Label("Path Settings:", headerStyle);
 
-            machine.TemplatePath = EditorGUILayout.TextField("Template: ", machine.TemplatePath);
-            machine.RuntimeClassPath = EditorGUILayout.TextField("Runtime: ", machine.RuntimeClassPath);
-            machine.EditorClassPath = EditorGUILayout.TextField("Editor:", machine.EditorClassPath);
-            machine.SaveScriptAssetFilePath = EditorGUILayout.TextField("SOData:", machine.SaveScriptAssetFilePath);
+            EditorGUILayout.LabelField("Template: ", ExcelSettings.Instance.TemplatePath);
+            EditorGUILayout.LabelField("Runtime: ", ExcelSettings.Instance.RuntimePath);
+            EditorGUILayout.LabelField("Editor:", ExcelSettings.Instance.EditorPath);
+            EditorGUILayout.LabelField("SOData:", ExcelSettings.Instance.SaveScriptAssetFilePath);
             //machine.DataFilePath = EditorGUILayout.TextField("Data:", machine.DataFilePath);
 
             machine.onlyCreateDataClass = EditorGUILayout.Toggle("Only DataClass", machine.onlyCreateDataClass);
@@ -182,15 +175,17 @@ namespace UnityQuickSheet
                     Debug.LogWarning("No spreadsheet or worksheet is specified.");
                     return;
                 }
-                CheckAndCreateDirectory(Application.dataPath + Path.DirectorySeparatorChar + machine.RuntimeClassPath);
-                CheckAndCreateDirectory(Application.dataPath + Path.DirectorySeparatorChar + machine.EditorClassPath);
+                CheckAndCreateDirectory(Application.dataPath + Path.DirectorySeparatorChar + ExcelSettings.Instance.RuntimePath);
+                CheckAndCreateDirectory(Application.dataPath + Path.DirectorySeparatorChar + ExcelSettings.Instance.EditorPath);
 
                 ScriptPrescription sp = Generate(machine);
                 if (sp != null)
                 {
+                    // 刷新表格 初始化数据
                     EditorPrefsSaveData.SetIsGenerateSOKey(true);
-                    Debug.Log("Successfully generated!" + EditorPrefsSaveData.GetIsGenerateSOKey());
-
+                    EditorPrefsSaveData.AllExcelFilePath = machine1.allExcelFilePath;
+                    Debug.Log("Successfully generated!");
+                    AssetDatabase.Refresh();
                 }
                 else
                     Debug.LogError("Failed to create a script from excel.");
@@ -200,7 +195,7 @@ namespace UnityQuickSheet
 
             if (GUILayout.Button("GenerateAllClass"))
             {
-                this.generateExcelDatas = ExcelMachineHelper.FindAllExcelData((target as ExcelMachine).allExcelFilePath);
+                this.generateExcelDatas = ExcelMachineHelper.FindAllExcelData(machine1.allExcelFilePath);
                 GenerateAllClass();
             }
             if (GUILayout.Button("GenerateAllObjectScript"))
@@ -348,8 +343,8 @@ namespace UnityQuickSheet
             if (machine is ExcelMachine target)
             {
                 // check 文件夹
-                string pathRuntime = Application.dataPath + Path.DirectorySeparatorChar + machine.RuntimeClassPath;
-                string pathEditor = Application.dataPath + Path.DirectorySeparatorChar + machine.EditorClassPath;
+                string pathRuntime = Application.dataPath + Path.DirectorySeparatorChar + ExcelSettings.Instance.RuntimePath;
+                string pathEditor = Application.dataPath + Path.DirectorySeparatorChar + ExcelSettings.Instance.EditorPath;
                 CheckAndCreateDirectory(pathRuntime);
                 CheckAndCreateDirectory(pathEditor);
 
@@ -529,74 +524,18 @@ namespace UnityQuickSheet
         /// </summary>
         public void CreateAllExcelSOByFind()
         {
-            // RefreshAllExcelSOByFind()
-            var allType = ReflectionHelper.FindAllScriptTypeByAttribute<ExcelSOClassAttribute>();
-            Debug.Log($"allTypeLength{allType.Count}");
-            ScriptableObject inst = null;
-            foreach (var oneType in allType)
-            {
-                if (oneType.IsGenericTypeDefinition)
-                {
-                    continue;
-                }
-
-                if (ReflectionHelper.AIsExtendsByB(oneType, typeof(ScriptableObject)))
-                {
-                    var resName = oneType.Name;
-                    string path = TargetPathForSOAsset(resName);
-                    ExcelTableBase data = (ExcelTableBase)AssetDatabase.LoadAssetAtPath(path, oneType);
-                    if (data == null)
-                    {
-                        inst = data = (ExcelTableBase)ScriptableObject.CreateInstance(oneType);
-                        AssetDatabase.CreateAsset(inst, path);
-                    }
-
-                    var config = FindGenerateExcelByOSClassName(resName, this.generateExcelDatas);
-
-                    ExcelQuery query = new ExcelQuery(config.excelPath, config.sheetName);
-                    if (query != null && query.IsValid())
-                    {
-                        // 设置数据
-                        data.SheetName = config.excelPath;
-                        data.WorksheetName = config.sheetName;
-
-                        FieldInfo pc = oneType.GetField("dataArray");
-                        var args = oneType.BaseType.GetGenericArguments();
-                        if (args.Length == 1 && pc.FieldType.IsArray)
-                        {
-                            var dataType = args[0];
-                            // 显式转换类型
-                            var targetListData = query.Deserialize(dataType);
-                            var targetData = targetListData.GetType().GetMethod("ToArray").Invoke(targetListData, new object[] { });
-
-                            pc.SetValue(data, targetData);
-                            // data.dataArray = query.Deserialize(dataType).ToArray();
-                            EditorUtility.SetDirty(data);
-                        }
-                        else
-                        {
-                            Debug.LogError($"{resName}没有找到对应的表格数据类型");
-                        }
-                    }
-
-                }
-            }
-
-            if (inst != null)
-            {
-                AssetDatabase.SaveAssets();
-                Selection.activeObject = inst;
-            }
+            this.generateExcelDatas = ExcelMachineHelper.FindAllExcelData(machine1.allExcelFilePath);
+            RefreshAllExcelSOByFind(this.generateExcelDatas);
         }
 
         /// <summary>
         /// 自行搜索脚本创建所有表格ScriptObject对象
         /// </summary>
-        public static void RefreshAllExcelSOByFind(string SOPath, List<GenerateExcelData> excelDatas)
+        public static void RefreshAllExcelSOByFind(List<GenerateExcelData> excelDatas)
         {
             var allType = ReflectionHelper.FindAllScriptTypeByAttribute<ExcelSOClassAttribute>();
-            Debug.Log($"allTypeLength{allType.Count}");
-            ScriptableObject inst = null;
+            Debug.Log($"start refresh excel SO allTypeLength{allType.Count}");
+            ExcelTableBase data = null;
             foreach (var oneType in allType)
             {
                 if (oneType.IsGenericTypeDefinition)
@@ -607,12 +546,12 @@ namespace UnityQuickSheet
                 if (ReflectionHelper.AIsExtendsByB(oneType, typeof(ScriptableObject)))
                 {
                     var resName = oneType.Name;
-                    string path = SOPath;
-                    ExcelTableBase data = (ExcelTableBase)AssetDatabase.LoadAssetAtPath(path, oneType);
+                    string path = ExcelMachineHelper.TargetPathForSOAsset(resName);
+                    data = (ExcelTableBase)AssetDatabase.LoadAssetAtPath(path, oneType);
                     if (data == null)
                     {
-                        inst = data = (ExcelTableBase)ScriptableObject.CreateInstance(oneType);
-                        AssetDatabase.CreateAsset(inst, path);
+                        data = (ExcelTableBase)ScriptableObject.CreateInstance(oneType);
+                        AssetDatabase.CreateAsset(data, path);
                     }
 
                     var config = FindGenerateExcelByOSClassName(resName, excelDatas);
@@ -646,11 +585,8 @@ namespace UnityQuickSheet
                 }
             }
 
-            if (inst != null)
-            {
-                AssetDatabase.SaveAssets();
-                Selection.activeObject = inst;
-            }
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = data;
         }
     }
 }

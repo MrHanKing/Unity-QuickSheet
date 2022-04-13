@@ -167,60 +167,6 @@ namespace UnityQuickSheet
         protected readonly static string ImportSettingFilename = "New Import Setting.asset";
 
         [SerializeField]
-        private string templatePath = "QuickSheet/Templates";
-        /// <summary>
-        /// 脚本模版位置
-        /// </summary>
-        /// <value></value>
-        public string TemplatePath
-        {
-            get { return templatePath; }
-            set { templatePath = value; }
-        }
-
-        /// <summary>
-        /// path the created ScriptableObject class file will be located.
-        /// </summary>
-        [SerializeField]
-        private string scriptFilePath;
-        /// <summary>
-        /// 运行时类位置
-        /// </summary>
-        /// <value></value>
-        public string RuntimeClassPath
-        {
-            get { return scriptFilePath; }
-            set { scriptFilePath = value; }
-        }
-
-        /// <summary>
-        /// path the created editor script files will be located.
-        /// </summary>
-        [SerializeField]
-        private string editorScriptFilePath;
-        /// <summary>
-        /// 编辑器脚本位置
-        /// </summary>
-        /// <value></value>
-        public string EditorClassPath
-        {
-            get { return editorScriptFilePath; }
-            set { editorScriptFilePath = value; }
-        }
-
-        [SerializeField]
-        private string saveScriptAssetFilePath;
-        /// <summary>
-        /// 编辑器生成的ScriptObject所在位置
-        /// </summary>
-        /// <value></value>
-        public string SaveScriptAssetFilePath
-        {
-            get { return saveScriptAssetFilePath; }
-            set { saveScriptAssetFilePath = value; }
-        }
-
-        [SerializeField]
         private string sheetName;
         /// <summary>
         /// 电子表格名字
@@ -273,27 +219,11 @@ namespace UnityQuickSheet
             return false;
         }
 
-        protected readonly string DEFAULT_CLASS_PATH = "Scripts/Runtime";
-        protected readonly string DEFAULT_EDITOR_PATH = "Scripts/Editor";
-
         protected void OnEnable()
         {
             if (columnHeaderList == null)
                 columnHeaderList = new List<ColumnHeader>();
         }
 
-        /// <summary>
-        /// Initialize with default value whenever the asset file is enabled.
-        /// </summary>
-        public void ReInitialize()
-        {
-            if (string.IsNullOrEmpty(RuntimeClassPath))
-                RuntimeClassPath = DEFAULT_CLASS_PATH;
-            if (string.IsNullOrEmpty(EditorClassPath))
-                EditorClassPath = DEFAULT_EDITOR_PATH;
-
-            // reinitialize. it does not need to be serialized.
-            onlyCreateDataClass = false;
-        }
     }
 }

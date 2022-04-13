@@ -38,6 +38,11 @@ namespace UnityQuickSheet
         /// A path where generated editor script files are to be put.
         /// </summary>
         public string EditorPath = string.Empty;
+        /// <summary>
+        /// 脚本资源所在路径
+        /// </summary>
+        [SerializeField]
+        public string SaveScriptAssetFilePath = string.Empty;
 
         /// <summary>
         /// Select currently exist account setting asset file.
@@ -182,6 +187,21 @@ namespace UnityQuickSheet
             Debug.Assert(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(instanceId, out string guid, out long _), "Failed to extract the asset Guid");
             return guid;
         }
+
+        #region 
+        protected readonly string DEFAULT_CLASS_PATH = "Scripts/Runtime";
+        protected readonly string DEFAULT_EDITOR_PATH = "Scripts/Editor";
+        /// <summary>
+        /// Initialize with default value whenever the asset file is enabled.
+        /// </summary>
+        public void ReInitialize()
+        {
+            if (string.IsNullOrEmpty(RuntimePath))
+                RuntimePath = DEFAULT_CLASS_PATH;
+            if (string.IsNullOrEmpty(EditorPath))
+                EditorPath = DEFAULT_EDITOR_PATH;
+        }
+        #endregion
     }
 
     public class AddressableEntryNotFoundException : Exception
@@ -191,4 +211,7 @@ namespace UnityQuickSheet
         {
         }
     }
+
+
+
 }

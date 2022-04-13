@@ -100,7 +100,7 @@ namespace UnityQuickSheet
             sp.template = GetTemplate("ScriptableObjectClass");
 
             // check the directory path exists
-            string fullPath = TargetPathForClassScript(machine.WorkSheetName);
+            string fullPath = ExcelMachineHelper.TargetPathForClassScript(machine.WorkSheetName);
             string folderPath = Path.GetDirectoryName(fullPath);
             if (!Directory.Exists(folderPath))
             {
@@ -144,7 +144,7 @@ namespace UnityQuickSheet
             sp.template = GetTemplate("ScriptableObjectEditorClass");
 
             // check the directory path exists
-            string fullPath = TargetPathForEditorScript(machine.WorkSheetName);
+            string fullPath = ExcelMachineHelper.TargetPathForEditorScript(machine.WorkSheetName);
             string folderPath = Path.GetDirectoryName(fullPath);
             if (!Directory.Exists(folderPath))
             {
@@ -183,7 +183,7 @@ namespace UnityQuickSheet
         protected void CreateDataClassScript(BaseMachine machine, ScriptPrescription sp)
         {
             // check the directory path exists
-            string fullPath = TargetPathForData(machine.WorkSheetName);
+            string fullPath = ExcelMachineHelper.TargetPathForData(machine.WorkSheetName);
             string folderPath = Path.GetDirectoryName(fullPath);
             if (!Directory.Exists(folderPath))
             {
@@ -227,85 +227,19 @@ namespace UnityQuickSheet
         }
 
         /// <summary>
-        /// e.g. "Assets/Script/Data/Runtime/Item.cs"
-        /// </summary>
-        protected string TargetPathForClassScript(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.RuntimeClassPath, worksheetName + "." + "cs");
-        }
-
-        /// <summary>
-        /// e.g. "Assets/Script/Data/Editor/ItemEditor.cs"
-        /// </summary>
-        protected string TargetPathForEditorScript(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.EditorClassPath, worksheetName + "Editor" + "." + "cs");
-        }
-
-        /// <summary>
-        /// data class script file has 'WorkSheetNameData' for its filename.
-        /// e.g. "Assets/Script/Data/Runtime/ItemData.cs"
-        /// </summary>
-        protected string TargetPathForData(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.RuntimeClassPath, worksheetName + "Data" + "." + "cs");
-        }
-
-        /// <summary>
-        /// e.g. "Assets/Script/Data/Editor/ItemAssetCreator.cs"
-        /// </summary>
-        protected string TargetPathForAssetFileCreateFunc(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.EditorClassPath, worksheetName + "AssetCreator" + "." + "cs");
-        }
-
-        /// <summary>
-        /// AssetPostprocessor class should be under "Editor" folder.
-        /// </summary>
-        protected string TargetPathForAssetPostProcessorFile(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.EditorClassPath, worksheetName + "AssetPostProcessor" + "." + "cs");
-        }
-        /// <summary>
-        /// 获得目标ScriptObject存储位置
-        /// </summary>
-        /// <param name="worksheetName"></param>
-        /// <returns></returns>
-        protected string TargetPathForSOAsset(string worksheetName)
-        {
-            return Path.Combine("Assets/" + machine.SaveScriptAssetFilePath, worksheetName + ".asset");
-        }
-
-        /// <summary>
         /// Retrieves all ascii text in the given template file.
         /// </summary>
         protected string GetTemplate(string nameWithoutExtension)
         {
-            string path = Path.Combine(GetAbsoluteCustomTemplatePath(), nameWithoutExtension + ".txt");
+            string path = Path.Combine(ExcelMachineHelper.GetAbsoluteCustomTemplatePath(), nameWithoutExtension + ".txt");
             if (File.Exists(path))
                 return File.ReadAllText(path);
 
-            path = Path.Combine(GetAbsoluteBuiltinTemplatePath(), nameWithoutExtension + ".txt");
+            path = Path.Combine(ExcelMachineHelper.GetAbsoluteBuiltinTemplatePath(), nameWithoutExtension + ".txt");
             if (File.Exists(path))
                 return File.ReadAllText(path);
 
             return NoTemplateString;
-        }
-
-        /// <summary>
-        /// e.g. "Assets/QuickSheet/Templates"
-        /// </summary>
-        protected string GetAbsoluteCustomTemplatePath()
-        {
-            return Path.Combine(Application.dataPath, machine.TemplatePath);
-        }
-
-        /// <summary>
-        /// e.g. "C:/Program File(x86)/Unity/Editor/Data"
-        /// </summary>
-        protected string GetAbsoluteBuiltinTemplatePath()
-        {
-            return Path.Combine(EditorApplication.applicationContentsPath, machine.TemplatePath);
         }
 
         /// <summary>

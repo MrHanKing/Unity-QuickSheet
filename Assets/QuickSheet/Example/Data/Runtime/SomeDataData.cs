@@ -6,7 +6,7 @@ using System.Collections;
 /// !!! DO NOT CHANGE Tabs to Spaces !!!
 /// 
 [System.Serializable]
-public class ExcelExampleData
+public class SomeDataData
 {
   [SerializeField]
   string id;
@@ -23,5 +23,9 @@ public class ExcelExampleData
   [SerializeField]
   string difficulty;
   public string Difficulty { get {return difficulty; } set { this.difficulty = value;} }
+  
+  [SerializeField]
+  string hello;
+  public string Hello { get {return hello; } set { this.hello = value;} }
   
 }
